@@ -1,0 +1,7 @@
+# python3.7
+PyQt5==5.15.5
+opencv-python==4.6.0.66
+# for mac opencv-python-headless
+numpy==1.21.6
+easyocr==1.6.2
+openalpr==1.1.0
