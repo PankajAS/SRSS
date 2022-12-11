@@ -79,3 +79,5 @@ if __name__ == '__main__':
     screenShape = QDesktopWidget().screenGeometry()
     ex.resize(screenShape.width(), screenShape.height())
     sys.exit(app.exec_())
+#  c:\users\dell\appdata\local\programs\python\python37\python.exe init.py
+#("./assets/haarcascade_russian_plate_number.xml","."),("./assets/cars.jpeg","./assets")

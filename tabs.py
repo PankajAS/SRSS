@@ -111,7 +111,7 @@ def open_cam_rtsp(uri, width=1280, height=720, latency=2000):
 
 
 def main():
-    alpr = Alpr("us", "C:/OpenALPR/openalpr/config/openalpr.conf.user", "C:/OpenALPR/openalpr/runtime_data")
+    alpr = Alpr("us", "C:/openalpr_64/openalpr.conf", "C:/openalpr_64/runtime_data")
     print("alpr.is_loaded()")
     if not alpr.is_loaded():
         print('Error loading OpenALPR')

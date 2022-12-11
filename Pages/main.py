@@ -65,7 +65,7 @@ class MainTab(QWidget):
         listWidgetItem = QListWidgetItem("Number Plates")
         listWidgetItem.setTextAlignment(Qt.AlignHCenter)
         listWidgetItem.setBackground(QColor('#5A5A5A'))
-        listWidgetItem.setSizeHint(QSize(100,40))
+        listWidgetItem.setSizeHint(QSize(100,30))
         
       #   self.cameralist.addItem(listWidgetItem)
         self.anprView.addItem(listWidgetItem)
@@ -158,12 +158,23 @@ class MainTab(QWidget):
 
      @pyqtSlot(np.ndarray)
      def detect_plats(self,image):
-         anpr = ANPRDetector()
+         anpr = ANPRDetector(self, image)
+         anpr.number_plate.connect(self.add_plats)
+         anpr.start()
          print(image)
          # anpr.startDetectNumberPlate()
-         thread = Thread(target=anpr.startDetectNumberPlate, args=(image,))
-         thread.daemon = True
-         thread.start()
+         # thread = Thread(target=anpr.startDetectNumberPlate, args=(image,))
+         # thread.daemon = True
+         # thread.start()
+         
+
+     @pyqtSlot(str)
+     def add_plats(self,numberplate):
+         listWidgetItem = QListWidgetItem(numberplate)
+         listWidgetItem.setTextAlignment(Qt.AlignHCenter)
+      #   self.cameralist.addItem(listWidgetItem)
+         self.anprView.addItem(listWidgetItem)
+         
 
 
      @pyqtSlot(str, int)

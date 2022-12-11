@@ -6,7 +6,7 @@ from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 import numpy as np
 import os
-from Utils.ANPRDetector import ANPRDetector
+# from Utils.ANPRDetector import ANPRDetector
 import urllib
 
 # Video capture thread
@@ -24,7 +24,7 @@ class VideoThread(QThread):
         self.cam_id = cam_id
         self.frame = None
         self.videoimage = videoimage
-        self.anpr = ANPRDetector()
+        # self.anpr = ANPRDetector()
         # self.videoimage.image.setScaledContents(True)
         self.disply_width = videoimage.width
         self.display_height = videoimage.height
@@ -50,7 +50,7 @@ class VideoThread(QThread):
     
     def update(self):
         while self.loop:
-            cv2.waitKey(1)
+            # cv2.waitKey(1)
             ret, cv_img = self.cap.read()
             # print('running', ret, self.flag)
             # print(ret)
@@ -66,14 +66,14 @@ class VideoThread(QThread):
                 # self.thread.daemon = True
                 # self.thread.start()
                 if len(self.images)==100:
-                    img = cv2.imread("./Config/cars.jpeg")
+                    img = cv2.imread("./assets/cars.jpeg")
                     # print("Run", type(self.images[0]))
                     self.detect_pixmap_signal.emit(img)
                     # self.anpr.startDetectNumberPlate(self.images)
                     # thread = Thread(target=self.anpr.startDetectNumberPlate, args=(cv_img,))
                     # thread.daemon = True
                     # thread.start()
-                    # self.images = []
+                    self.images = []
                 if self.isRecording==True:
                     cv_img1 = cv2.circle(cv_img, (10, 20), radius=3, color=(0, 0, 255), thickness=-1)
                     # cv_img1 = cv2.putText(cv_img, "", (10, 20), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)

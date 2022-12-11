@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRegExp, QThread
 from PyQt5.QtGui import QRegExpValidator
 import time
-from onvif import ONVIFCamera, ONVIFError
+# from onvif import ONVIFCamera, ONVIFError
 from threading import Thread
 import asyncio
 from functools import partial
@@ -53,6 +53,7 @@ class SettingsTab(QWidget):
         # lay.addWidget(QtWidgets.QTextEdit(),0,0)
 
         self.table = QTableWidget(0,8)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setHorizontalHeaderLabels(["SL NO.","CAMERA NAME","CAMERA ADDRESS(IP)","USER NAME","PASSWORD","STATUS","ACTION","RECORDING"])
 
         lay.addWidget(QTextEdit(), 0,1)
@@ -75,12 +76,31 @@ class SettingsTab(QWidget):
             
             startRecording.clicked.connect(partial(self.startRecord,data,rowPosition))
 
-            self.table.setItem(rowPosition , 0, QTableWidgetItem(str(item['id'])))
-            self.table.setItem(rowPosition , 1, QTableWidgetItem(item['name']))
-            self.table.setItem(rowPosition , 2,  QTableWidgetItem(item['ip']))
-            self.table.setItem(rowPosition , 3,  QTableWidgetItem(item['user']))
-            self.table.setItem(rowPosition , 4,  QTableWidgetItem(item['pass']))
-            self.table.setCellWidget(rowPosition, 5,QLabel("Not Connected"))
+            idItem = QTableWidgetItem(str(item['id']))
+            idItem.setTextAlignment(Qt.AlignHCenter)
+
+            nameItem = QTableWidgetItem(str(item['name']))
+            nameItem.setTextAlignment(Qt.AlignHCenter)
+
+            ipItem = QTableWidgetItem(str(item['ip']))
+            ipItem.setTextAlignment(Qt.AlignHCenter)
+
+
+            userItem = QTableWidgetItem(str(item['user']))
+            userItem.setTextAlignment(Qt.AlignHCenter)
+
+            passItem = QTableWidgetItem(str(item['pass']))
+            passItem.setTextAlignment(Qt.AlignHCenter)
+
+            statusItem = QLabel("Not Connected")
+            statusItem.setAlignment(Qt.AlignHCenter)
+
+            self.table.setItem(rowPosition , 0, idItem)
+            self.table.setItem(rowPosition , 1, nameItem)
+            self.table.setItem(rowPosition , 2,  ipItem)
+            self.table.setItem(rowPosition , 3,  userItem)
+            self.table.setItem(rowPosition , 4,  passItem)
+            self.table.setCellWidget(rowPosition, 5,statusItem)
             self.table.setCellWidget(rowPosition, 6,connectbtn)
             self.table.setCellWidget(rowPosition, 7,startRecording)
 
@@ -180,15 +200,35 @@ class SettingsTab(QWidget):
             disconnectbtn.clicked.connect(partial(self.disconnectCamera,data,rowPosition))
 
             startRecording.clicked.connect(partial(self.startRecord,data,rowPosition))
+
+            idItem = QTableWidgetItem(str(rowPosition+1))
+            idItem.setTextAlignment(Qt.AlignHCenter)
+
+            nameItem = QTableWidgetItem(self.nameInput.text())
+            nameItem.setTextAlignment(Qt.AlignHCenter)
+
+            ipItem = QTableWidgetItem(self.ip.text())
+            ipItem.setTextAlignment(Qt.AlignHCenter)
+
+
+            userItem = QTableWidgetItem(self.username.text())
+            userItem.setTextAlignment(Qt.AlignHCenter)
+
+            passItem = QTableWidgetItem(self.password.text())
+            passItem.setTextAlignment(Qt.AlignHCenter)
+
+            statusItem = QLabel("Not Connected")
+            statusItem.setAlignment(Qt.AlignHCenter)
+
             
-            self.table.setItem(rowPosition , 0, QTableWidgetItem(str(rowPosition+1)))
-            self.table.setItem(rowPosition , 1, QTableWidgetItem(self.nameInput.text()))
-            self.table.setItem(rowPosition , 2, QTableWidgetItem(self.ip.text()))
-            self.table.setItem(rowPosition , 3, QTableWidgetItem(self.username.text()))
-            self.table.setItem(rowPosition , 4, QTableWidgetItem(self.password.text()))
+            self.table.setItem(rowPosition , 0, idItem)
+            self.table.setItem(rowPosition , 1, nameItem)
+            self.table.setItem(rowPosition , 2, ipItem)
+            self.table.setItem(rowPosition , 3, userItem)
+            self.table.setItem(rowPosition , 4, passItem)
             # self.table.setItem(rowPosition , 5, QTableWidgetItem("Not Connected"))
             # self.table.setItem(rowPosition , 6, QTableWidgetItem(connectbtn))
-            self.table.setCellWidget(rowPosition, 5,QLabel("Not Connected"))
+            self.table.setCellWidget(rowPosition, 5,statusItem)
             self.table.setCellWidget(rowPosition, 6,connectbtn)
             self.table.setCellWidget(rowPosition, 7,startRecording)
             # disconnectbtn.hide()
@@ -202,9 +242,9 @@ class SettingsTab(QWidget):
             self.username.setText("")
             self.nameInput.setText("")
             self.password.setText("")
-        except ONVIFError as e:
-            print(type(e), e.__str__()) 
-            self.error.setText(e.__str__().split(": ")[2])
+        except:
+            # print(type(e), e.__str__()) 
+            self.error.setText("")
             self.error.show()
         
         self.loading.setHidden(True)
@@ -232,15 +272,19 @@ class SettingsTab(QWidget):
         disconnectbtn = QPushButton('Disonnect')
         disconnectbtn.clicked.connect(partial(self.disconnectCamera,data,rowPosition))
         self.table.setCellWidget(rowPosition, 6,disconnectbtn)
-        self.table.setCellWidget(rowPosition, 5,QLabel("Connected"))
+        statusItem = QLabel("Connected")
+        statusItem.setAlignment(Qt.AlignHCenter)
+        self.table.setCellWidget(rowPosition, 5,statusItem)
     
     def disconnectCamera(self, data,rowPosition):
         print("disconnectCamera ", data)
         self.error.hide()
+        statusItem = QLabel("Not Connected")
+        statusItem.setAlignment(Qt.AlignHCenter)
         connectbtn = QPushButton('Connect')
         connectbtn.clicked.connect(partial(self.connectCamera,data,rowPosition))
         self.table.setCellWidget(rowPosition, 6,connectbtn)
-        self.table.setCellWidget(rowPosition, 5,QLabel("Not Connected"))
+        self.table.setCellWidget(rowPosition, 5,statusItem)
         self.main.remove_camera(data)
 
 

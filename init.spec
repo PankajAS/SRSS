@@ -8,7 +8,7 @@ a = Analysis(
     ['init.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[("./assets/haarcascade_russian_plate_number.xml","."),("./assets/cars.jpeg","./assets"),("./storage","./storage")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
