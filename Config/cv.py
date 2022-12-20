@@ -30,7 +30,7 @@ class VideoThread(QThread):
         self.display_height = videoimage.height
         self.isRecording = False
         self.daemon = True
-        self.video_stream_widget = RTSPVideoWriterObject(self.cap,self.update, self.frame, self.flag)
+        # self.video_stream_widget = RTSPVideoWriterObject(self.cap,self.update, self.frame, self.flag)
         # print(self.url, self.cam_id)
 
     def run(self):
@@ -46,7 +46,10 @@ class VideoThread(QThread):
         
 #        self.update()
     def stopThread(self):
-        self.join()
+        self.loop = False
+    
+    def recordingConfig(self, path):
+        self.video_stream_widget = RTSPVideoWriterObject(self.cap,self.update, self.frame, self.flag,path)
     
     def update(self):
         while self.loop:
@@ -66,9 +69,9 @@ class VideoThread(QThread):
                 # self.thread.daemon = True
                 # self.thread.start()
                 if len(self.images)==100:
-                    img = cv2.imread("./assets/cars.jpeg")
+                    # img = cv2.imread("./assets/cars.jpeg")
                     # print("Run", type(self.images[0]))
-                    self.detect_pixmap_signal.emit(img)
+                    self.detect_pixmap_signal.emit(cv_img)
                     # self.anpr.startDetectNumberPlate(self.images)
                     # thread = Thread(target=self.anpr.startDetectNumberPlate, args=(cv_img,))
                     # thread.daemon = True
@@ -102,7 +105,7 @@ class VideoThread(QThread):
 
 # Recording Video
 class RTSPVideoWriterObject(object):
-    def __init__(self, capture, update, frame, flag):
+    def __init__(self, capture, update, frame, flag,path):
         
         self.frame = frame
         self.flag = flag
@@ -112,8 +115,7 @@ class RTSPVideoWriterObject(object):
         
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
-        self.output_video = cv2.VideoWriter(f'storage/{self.flag}.avi', self.codec, 10, (self.frame_width, self.frame_height))
-
+        self.output_video = cv2.VideoWriter(f'{path}/{self.flag}.avi', self.codec, 10, (self.frame_width, self.frame_height))
         # Start the thread to read frames from the video stream
         # self.thread = Thread(target=update, args=())
         # self.thread.daemon = True

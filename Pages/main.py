@@ -82,9 +82,10 @@ class MainTab(QWidget):
          data['thread'].isRecording = False
          print(data['thread'].isRecording)
 
-     def startRecording(self,data):
+     def startRecording(self,data, path):
          print(data)
          data['thread'].isRecording = True
+         data['thread'].recordingConfig(path)
 
 
      def add_camera(self, details):
@@ -222,7 +223,7 @@ class MainTab(QWidget):
          # image_label.setScaledContents(True)
          print("image_label.height()",image_label.height())
          videoimage = VideoImages(data.get('name'), user, image_label, ip,password,data.get('id'))
-         newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag='CAM-'+str(data['slot']), cam_id=data['id'], videoimage=videoimage)
+         newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=data['id'], videoimage=videoimage)
          data['thread'] = newthread
          self.video_threads.append(data)
          return data
@@ -233,7 +234,9 @@ class MainTab(QWidget):
          newthread = [d['thread'] for d in self.video_threads if d.get('id') == imageData.id]
          print(newthread)
          if newthread[0].isRunning():
-            newthread[0].terminate()
+            newthread[0].stopThread()
+            newthread[0].quit()
+            newthread[0].wait()
 
 
          index = next((index for index, d in enumerate(self.cameraInstanceList) if d.id == imageData.id), None)

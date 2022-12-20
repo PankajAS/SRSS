@@ -9,13 +9,12 @@ class ANPRDetector(QThread):
      number_plate = pyqtSignal(str)
      def __init__(self, parent, img):
         super(QThread, self).__init__(parent)
-        self.faceCascade = cv2.CascadeClassifier('./haarcascade_russian_plate_number.xml')
+        self.faceCascade = cv2.CascadeClassifier('./assets/haarcascade_russian_plate_number.xml')
         self.img = img
 
      def run(self):
             gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
             
-            self.faceCascade = cv2.CascadeClassifier('./haarcascade_russian_plate_number.xml')
             faces = self.faceCascade.detectMultiScale(gray,scaleFactor=1.2, minNeighbors = 5, minSize=(25,25))
             plate = []
             for (x,y,w,h) in faces:

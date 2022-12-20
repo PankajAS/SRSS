@@ -4,6 +4,8 @@ from Pages.main import MainTab
 from Pages.search import SearchTab
 from Pages.settings import SettingsTab
 from Pages.login import LoginForm
+from Config.db import SESDatabase
+
 
 
 
@@ -51,9 +53,14 @@ class MainTabsLayout(QWidget):
             margin: 0 -15px -15px -15px;
         }
         """)
+        db = SESDatabase()
+        db.createDb()
+        db.createCameraTable()
+        db.createSettingsTable()
+
         self.tab1 = MainTab(self)
         self.tab2 = SearchTab(self)
-        self.tab3 = SettingsTab(self, self.tab1)
+        self.tab3 = SettingsTab(self, self.tab1, db)
         # self.login = LoginForm(self)
         self.tab1.setTab(self.tab3)
         self.tabs.resize(400,200)
