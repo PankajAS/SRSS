@@ -7,6 +7,7 @@ import time
 from threading import Thread
 import asyncio
 from functools import partial
+import uuid
 
 class SettingsTab(QWidget):
     
@@ -14,23 +15,7 @@ class SettingsTab(QWidget):
         super(QWidget, self).__init__(parent)
         self.database = database
         self.cameraList = self.database.getCameraRecords()
-        # [{'id': 1, 'name': 'CAM-1', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 2, 'name': 'CAM-2', 'ip': '192.168.1.251', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 3, 'name': 'CAM-3', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 4, 'name': 'CAM-4', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 5, 'name': 'CAM-5', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 17, 'name': 'CAM-17', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 6, 'name': 'CAM-7', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 7, 'name': 'CAM-8', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 8, 'name': 'CAM-9', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 9, 'name': 'CAM-10', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 10, 'name': 'CAM-11', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 11, 'name': 'CAM-12', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 12, 'name': 'CAM-13', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 13, 'name': 'CAM-14', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 14, 'name': 'CAM-15', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 15, 'name': 'CAM-16', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'},
-        # {'id': 16, 'name': 'CAM-17', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'}]
+        # Exmaple Record [{'id': 1, 'name': 'CAM-1', 'ip': '192.168.1.250', 'user': 'admin', 'pass': 'admin123'}]
 
         self.main = maintab
 
@@ -54,9 +39,9 @@ class SettingsTab(QWidget):
 
         # lay.addWidget(QtWidgets.QTextEdit(),0,0)
 
-        self.table = QTableWidget(0,9)
+        self.table = QTableWidget(0,10)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.setHorizontalHeaderLabels(["SL NO.","CAMERA NAME","CAMERA ADDRESS(IP)","USER NAME","PASSWORD","STATUS","ACTION","RECORDING","DELETE"])
+        self.table.setHorizontalHeaderLabels(["SL NO.","CAMERA NAME","CAMERA ADDRESS(IP)","USER NAME","PASSWORD","STATUS","ACTION","RECORDING","DELETE","ANPR"])
 
         lay.addWidget(QTextEdit(), 0,1)
 
@@ -68,6 +53,7 @@ class SettingsTab(QWidget):
             disconnectbtn = QPushButton('Disonnect')
             startRecording = QPushButton('START')
             delete = QPushButton('DELETE')
+            anpr = QPushButton('ON')
 
             if len(getSettings)==0:
                 data = self.main.create_video_thread({"name":item['name'], "id":item['id'],"ip":item['ip'],
@@ -83,10 +69,11 @@ class SettingsTab(QWidget):
             disconnectbtn.clicked.connect(partial(self.disconnectCamera,data, rowPosition))
             
             startRecording.clicked.connect(partial(self.startRecord,data,rowPosition))
-            delete.clicked.connect(partial(self.deleteRecord,data,item['id']))
+            delete.clicked.connect(partial(self.deleteRecord,data,rowPosition))
+            anpr.clicked.connect(partial(self.onAnpr,data,rowPosition))
 
 
-            idItem = QTableWidgetItem(str(item['id']))
+            idItem = QTableWidgetItem(str(rowPosition+1))
             idItem.setTextAlignment(Qt.AlignHCenter)
 
             nameItem = QTableWidgetItem(str(item['name']))
@@ -114,31 +101,16 @@ class SettingsTab(QWidget):
             self.table.setCellWidget(rowPosition, 6,connectbtn)
             self.table.setCellWidget(rowPosition, 7,startRecording)
             self.table.setCellWidget(rowPosition, 8,delete)
+            self.table.setCellWidget(rowPosition, 9,anpr)
             
 
         lay.addWidget(self.table, 1,0,1,2)
-        
-        # .setStyleSheet("""
-        # QFormLayout 
-        # { 
-        #     background-color : grey;
-        #     padding: 10px; 
-        # }
-        # """)
 
         self.setLayout(lay)
 
     def createForm(self):
         layout = QFormLayout()
         layout.setLabelAlignment(Qt.AlignLeft|Qt.AlignVCenter)
-
-        # nameInput.setStyleSheet("""
-        # QLineEdit 
-        # { 
-        #     width: 180px;
-        #     height: 50px 
-        # }
-        # """)
 
         layout.addRow(QLabel("Camera Name"), self.nameInput)
         layout.addRow(QLabel("Camera Address (IP)"), self.ip)
@@ -150,18 +122,28 @@ class SettingsTab(QWidget):
 
         self.loading.setHidden(True)
         self.error.hide()
-
-        # time.sleep(10)
-        # loading.setHidden(False)
         
-
         return layout
     
     def deleteRecord(self,data,id):
-        print(id)
-        self.database.deleteCamera(id)
-        self.table.removeRow(id-1)
+        print('deleteRecord', id)
+        self.database.deleteCamera(data['id'])
+        self.table.removeRow(id)
         self.main.remove_camera(data)
+        print(self.cameraList)
+        del self.cameraList[id-1]
+    
+    def onAnpr(self,data,rowPosition):
+        offAnpr = QPushButton('OFF')
+        offAnpr.clicked.connect(partial(self.offAnpr,data,rowPosition))
+        self.table.setCellWidget(rowPosition, 9,offAnpr)
+        self.main.startAnpr(data)
+
+    def offAnpr(self,data,rowPosition):
+        offAnpr = QPushButton('ON')
+        offAnpr.clicked.connect(partial(self.onAnpr,data,rowPosition))
+        self.table.setCellWidget(rowPosition, 9,offAnpr)
+        self.main.stopAnpr(data)
 
     def startRecord(self,data, rowPosition):
         getSettings = self.database.getSettingsRecords()
@@ -200,22 +182,19 @@ class SettingsTab(QWidget):
         self.loading.setHidden(False)
         self.saveButton.hide() 
         try:
-            # thread = Thread(target = ONVIFCamera(self.ip.text(), 80, self.username.text(), self.password.text()))
-            # thread.start()
-            # thread.join()
-            # mycam = await ONVIFCamera(self.ip.text(), 80, self.username.text(), self.password.text())
-            # image_service = mycam.create_devicemgmt_service()
-            # print(image_service.GetHostname())
             
             rowPosition = self.table.rowCount()
-            self.database.addDataToCameraTable(rowPosition+1,self.username.text(),self.ip.text(),self.username.text(),self.password.text())
+            id = uuid.uuid4().int & (1<<32)-1
+            self.database.addDataToCameraTable(id,self.nameInput.text(),self.ip.text(),self.username.text(),self.password.text())
+            self.cameraList.append({'id':id,'name':self.nameInput.text(),'ip':self.ip.text(),'user':self.username.text(),'pass':self.password.text()})
             self.table.insertRow(rowPosition)
             connectbtn = QPushButton('Connect')
             disconnectbtn = QPushButton('Disonnect')
             startRecording = QPushButton('START')
             delete = QPushButton('DELETE')
+            anpr = QPushButton('ON')
 
-            data = self.main.create_video_thread({"name":self.nameInput.text(), "id":rowPosition+1,"ip":self.ip.text(),
+            data = self.main.create_video_thread({"name":self.nameInput.text(), "id":id,"ip":self.ip.text(),
             "user":self.username.text(),
             "pass":self.password.text(), "thread":None})
             
@@ -225,7 +204,8 @@ class SettingsTab(QWidget):
             disconnectbtn.clicked.connect(partial(self.disconnectCamera,data,rowPosition))
 
             startRecording.clicked.connect(partial(self.startRecord,data,rowPosition))
-            delete.clicked.connect(partial(self.deleteRecord,data,rowPosition+1))
+            delete.clicked.connect(partial(self.deleteRecord,data,rowPosition))
+            anpr.clicked.connect(partial(self.onAnpr,data,rowPosition))
 
             idItem = QTableWidgetItem(str(rowPosition+1))
             idItem.setTextAlignment(Qt.AlignHCenter)
@@ -252,18 +232,11 @@ class SettingsTab(QWidget):
             self.table.setItem(rowPosition , 2, ipItem)
             self.table.setItem(rowPosition , 3, userItem)
             self.table.setItem(rowPosition , 4, passItem)
-            # self.table.setItem(rowPosition , 5, QTableWidgetItem("Not Connected"))
-            # self.table.setItem(rowPosition , 6, QTableWidgetItem(connectbtn))
             self.table.setCellWidget(rowPosition, 5,statusItem)
             self.table.setCellWidget(rowPosition, 6,connectbtn)
             self.table.setCellWidget(rowPosition, 7,startRecording)
             self.table.setCellWidget(rowPosition, 8,delete)
-            # disconnectbtn.hide()
-            # self.table.setCellWidget(rowPosition, 6,disconnectbtn)
-            
-            # self.main.create_video_thread({"id":rowPosition+1,"ip":self.ip.text(),
-            # "user":self.username.text(),
-            # "pass":self.password.text(), "thread":None})
+            self.table.setCellWidget(rowPosition, 9,anpr)
 
             self.ip.setText("")
             self.username.setText("")
@@ -275,14 +248,12 @@ class SettingsTab(QWidget):
             self.error.show()
         
         self.loading.setHidden(True)
-        self.saveButton.show()  
-        # self.saveButton.show()
-        # self.loading.setHidden(True)
+        self.saveButton.show()
         # 192.168.1.250
 
     def connectCamera(self, data, rowPosition):
+        # import pdb
         self.error.hide()
-        print("connectCamera", data['thread'].videoimage)
         isAdded = self.main.add_camera(data)
         print("isAdded", isAdded)
         if isAdded==False:
@@ -295,13 +266,16 @@ class SettingsTab(QWidget):
             self.error.setText("Maximum Camera limit reached,\n only 4 Cameras can be add at a time.")
             self.error.show()
             return
-        
+        index = next((index for (index, d) in enumerate(self.cameraList) if d["id"] == data['id']), None)
+        print("index======",index, data['id'])
+        #print("connectCamera", data['thread'].videoimage)
+        # pdb.set_trace()
         disconnectbtn = QPushButton('Disonnect')
-        disconnectbtn.clicked.connect(partial(self.disconnectCamera,data,rowPosition))
-        self.table.setCellWidget(rowPosition, 6,disconnectbtn)
+        disconnectbtn.clicked.connect(partial(self.disconnectCamera,data,index))
+        self.table.setCellWidget(index, 6,disconnectbtn)
         statusItem = QLabel("Connected")
         statusItem.setAlignment(Qt.AlignHCenter)
-        self.table.setCellWidget(rowPosition, 5,statusItem)
+        self.table.setCellWidget(index, 5,statusItem)
     
     def disconnectCamera(self, data,rowPosition):
         print("disconnectCamera ", data)
@@ -309,9 +283,10 @@ class SettingsTab(QWidget):
         statusItem = QLabel("Not Connected")
         statusItem.setAlignment(Qt.AlignHCenter)
         connectbtn = QPushButton('Connect')
-        connectbtn.clicked.connect(partial(self.connectCamera,data,rowPosition))
-        self.table.setCellWidget(rowPosition, 6,connectbtn)
-        self.table.setCellWidget(rowPosition, 5,statusItem)
+        index = next((index for (index, d) in enumerate(self.cameraList) if d["id"] == data['id']), None)
+        connectbtn.clicked.connect(partial(self.connectCamera,data,index))
+        self.table.setCellWidget(index, 6,connectbtn)
+        self.table.setCellWidget(index, 5,statusItem)
         self.main.remove_camera(data)
 
 

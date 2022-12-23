@@ -21,30 +21,11 @@ class MainTab(QWidget):
 
         self.disply_width = 650
         self.display_height = 580
-        # create the video capture thread
-      #  self.thread = VideoThread('rtsp://admin:admin123@192.168.1.250', flag='CAM-1')
-
-        self.image_label = QLabel("No Camera")
-        self.image_label.setAlignment(Qt.AlignCenter)
-      #   self.phoneEd = QBoxLayout(self)
-        #phoneEd.setStyleSheet("QLabel { background-color : black; color : blue;z-index:10000 }")
-        self.image_label.setStyleSheet("QLabel { background-color : black;color:white; }")
-      #   self.image_label.resize(self.disply_width, self.display_height)
         
         self.image_label2 = QLabel("No Camera Available")
         self.image_label2.setAlignment(Qt.AlignCenter)
         self.image_label2.setStyleSheet("QLabel { background-color : black;color:white; }")
       #   self.image_label2.resize(self.disply_width, self.display_height)
-        
-        self.image_label3 = QLabel("No Camera")
-        self.image_label3.setAlignment(Qt.AlignCenter)
-        self.image_label3.setStyleSheet("QLabel { background-color : black;color:white; }")
-      #   self.image_label3.resize(self.disply_width, self.display_height)
-        
-        self.image_label4 = QLabel("No Camera")
-        self.image_label4.setAlignment(Qt.AlignCenter)
-        self.image_label4.setStyleSheet("QLabel { background-color : black;color:white; }")
-      #   self.image_label4.resize(self.disply_width, self.display_height)
 
         self.grid = QGridLayout(self)
         self.cameraGrid = QGridLayout(self)
@@ -87,11 +68,19 @@ class MainTab(QWidget):
          data['thread'].isRecording = True
          data['thread'].recordingConfig(path)
 
+     def startAnpr(self,data):
+         print(data)
+         data['thread'].isAnpr = True
+
+     def stopAnpr(self,data):
+         print(data)
+         data['thread'].isAnpr = False
+
 
      def add_camera(self, details):
          print(details)
          imageData = details['thread'].videoimage
-
+         print("imageData", imageData.id)
          imageData.slot = len(self.cameraInstanceList)+1
 
          if len(self.cameraInstanceList)==0:
@@ -109,8 +98,6 @@ class MainTab(QWidget):
 
          rowCounts = self.grid.rowCount()
          colCounts = self.grid.columnCount()
-
-         print(rowCounts, colCounts)
 
          imageData.image.setText("Loading.....")
          imageData.image.setScaledContents(True)
@@ -134,22 +121,13 @@ class MainTab(QWidget):
                   th['thread'].disply_width = d[j].width
                   th['thread'].display_height = d[j].height
          
-            
-         # newthread = [d['thread'] for d in self.video_threads if d.get('id') == details.get('id')]
-         # newthread[0].change_pixmap_signal.connect(self.update_image)
-         # newthread[0].error_single.connect(self.error_update)
-         # newthread[0].start()
          try:
             newthread = [d['thread'] for d in self.video_threads if d.get('id') == details.get('id')]
+            print(newthread[0].url)
             newthread[0].change_pixmap_signal.connect(self.update_image)
             newthread[0].detect_pixmap_signal.connect(self.detect_plats)
             newthread[0].error_single.connect(self.error_update)
             newthread[0].start()
-         #   newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}', flag='CAM-'+str(details['slot']))
-         #   print(newthread)
-         #   newthread = [d['thread'] for d in self.video_threads if d.get('id') != details.get('id')]
-         #   newthread.change_pixmap_signal.connect(self.update_image)
-         #   newthread.start()
          except:
             print('Something went wrong!')
             return 0
@@ -163,10 +141,6 @@ class MainTab(QWidget):
          anpr.number_plate.connect(self.add_plats)
          anpr.start()
          print(image)
-         # anpr.startDetectNumberPlate()
-         # thread = Thread(target=anpr.startDetectNumberPlate, args=(image,))
-         # thread.daemon = True
-         # thread.start()
          
 
      @pyqtSlot(str)
@@ -178,7 +152,7 @@ class MainTab(QWidget):
          
 
 
-     @pyqtSlot(str, int)
+     @pyqtSlot(str, object)
      def error_update(self,message, cam_id):
          # thread = [d['thread'] for d in self.video_threads if d.get('id') == cam_id]
          if len(self.cameraInstanceList)>0:
@@ -191,25 +165,15 @@ class MainTab(QWidget):
                print("self.cameraInstanceList", self.cameraInstanceList)
                self.tabs[0].disconnectCamera(data[0], data[0]['id']-1)
 
-     @pyqtSlot(QPixmap, int)
+     @pyqtSlot(QPixmap, object)
      def update_image(self,image_pixels, cam_id):
+         # print(cam_id , '3713524926')
          thread = [d for d in self.cameraInstanceList if d.id == cam_id]
-         print(thread)
          if len(thread)>0:
             thread[0].image.setPixmap(image_pixels)
-         # if len(self.cameraInstanceList)>0:
-         #    data = [d for d in self.video_threads if d['id'] == cam_id]
-         #    # if thread[0].isRunning():
-         #    #    thread[0].terminate()
-         #    print("error in: ", cam_id, data)
-         #    if len(data)>0:
-         #       data[0]['thread'].videoimage.image.setText(message)
-         #       print("self.cameraInstanceList", self.cameraInstanceList)
-         #       self.tabs[0].disconnectCamera(data[0], data[0]['id']-1)
       
      def setTab(self, tab):
          self.tabs.append(tab)
-
 
      def create_video_thread(self, data):
          user  = data.get('user')
@@ -221,10 +185,11 @@ class MainTab(QWidget):
          image_label.setAlignment(Qt.AlignCenter)
          image_label.setStyleSheet("QLabel { background-color : black;color:white; }")
          # image_label.setScaledContents(True)
-         print("image_label.height()",image_label.height())
-         videoimage = VideoImages(data.get('name'), user, image_label, ip,password,data.get('id'))
-         newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=data['id'], videoimage=videoimage)
+         print("datatoAddInitially ",data)
+         videoimage = VideoImages(data.get('name'), user, image_label, ip,password,id)
+         newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=id, videoimage=videoimage)
          data['thread'] = newthread
+         print("afterThread ",newthread.cam_id)
          self.video_threads.append(data)
          return data
       

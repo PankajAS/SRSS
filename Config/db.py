@@ -78,7 +78,7 @@ class SESDatabase:
          VALUES ('{id}', '{name}', '{ip}', '{user}', '{password}')""")
         print("inserted", query.lastError().text())
         self.con.commit()
-        print(self.con.tables())
+        print(id, self.con.tables())
 
     def getCameraRecords(self):
         records = []
