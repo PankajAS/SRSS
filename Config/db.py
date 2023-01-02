@@ -69,6 +69,15 @@ class SESDatabase:
         self.con.commit()
         print(self.con.tables())
 
+    def deleteSettings(self):
+        if self.con.isOpen()==False:
+            self.con.open()
+        query = QSqlQuery(self.con)
+        result = query.exec(
+         f"""Delete from settings where id is not null""")
+        print("delete-settings: ", query.lastError().text())
+        self.con.commit()
+
     def addDataToCameraTable(self, id,name,ip,user,password):
         if self.con.isOpen()==False:
             self.con.open()

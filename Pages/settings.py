@@ -31,6 +31,14 @@ class SettingsTab(QWidget):
         self.password = QLineEdit()
         self.password.setEchoMode(QLineEdit.Password)
         self.saveButton = QPushButton('Save Camera', self)
+        self.pathLabel =  QLabel("Path: -----")
+        self.path =  None
+
+        getSettings = self.database.getSettingsRecords()
+
+        if len(getSettings)>0:
+            self.path = getSettings[0]['recordingpath']
+            self.pathLabel.setText(f"Path: {self.path}")
         
         self.saveButton.clicked.connect(self.saveCamera)
         self.loading = QLabel("Connecting.....")
@@ -112,11 +120,16 @@ class SettingsTab(QWidget):
         layout = QFormLayout()
         layout.setLabelAlignment(Qt.AlignLeft|Qt.AlignVCenter)
 
+        pathConfig = QPushButton('Select Location', self)
+
+        pathConfig.clicked.connect(partial(self.configVideoLocation))
+
         layout.addRow(QLabel("Camera Name"), self.nameInput)
         layout.addRow(QLabel("Camera Address (IP)"), self.ip)
         layout.addRow(QLabel("User Name(ID)"), self.username)
         layout.addRow(QLabel("Password"), self.password)
         layout.addRow(None, self.saveButton)
+        layout.addRow(self.pathLabel,pathConfig)
         layout.addRow(None, self.loading)
         layout.addRow(None, self.error)
 
@@ -125,6 +138,17 @@ class SettingsTab(QWidget):
         
         return layout
     
+    def configVideoLocation(self):
+        folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        if folderpath:
+            self.error.setText("")
+            self.error.hide()
+            self.path = folderpath
+            self.pathLabel.setText("Path: "+self.path)
+            self.database.deleteSettings()
+            self.database.addDataToSettingsTable(1,folderpath)
+            print("configVideoLocation",self.path)
+
     def deleteRecord(self,data,id):
         print('deleteRecord', id)
         self.database.deleteCamera(data['id'])
@@ -146,18 +170,25 @@ class SettingsTab(QWidget):
         self.main.stopAnpr(data)
 
     def startRecord(self,data, rowPosition):
-        getSettings = self.database.getSettingsRecords()
-        folderpath = None
-        if len(getSettings)==0:
-            folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder')
-            self.database.addDataToSettingsTable(1,folderpath)
-        else:
-            folderpath = getSettings[0]['recordingpath']
-
+        # getSettings = self.database.getSettingsRecords()
+        # folderpath = None
+        # if len(getSettings)==0:
+        #     folderpath = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        #     self.path = folderpath
+        #     self.database.addDataToSettingsTable(1,folderpath)
+        # else:
+        #     folderpath = getSettings[0]['recordingpath']
+        
+        if self.path==None:
+            self.error.setText("Select Video Path")
+            self.error.show()
+            return
+        #     self.configVideoLocation()
+        # self.path = getSettings[0]['recordingpath']
         startRecording = QPushButton('STOP')
         startRecording.clicked.connect(partial(self.stopRecord,data,rowPosition))
         self.table.setCellWidget(rowPosition, 7,startRecording)
-        self.main.startRecording(data,folderpath)
+        self.main.startRecording(data,self.path)
 
     def stopRecord(self,data, rowPosition):
         startRecording = QPushButton('START')
