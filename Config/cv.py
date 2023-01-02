@@ -8,6 +8,7 @@ import numpy as np
 import os
 # from Utils.ANPRDetector import ANPRDetector
 import urllib
+import datetime
 
 # Video capture thread
 class VideoThread(QThread):
@@ -45,7 +46,7 @@ class VideoThread(QThread):
         self.loop = False
     
     def recordingConfig(self, path):
-        self.video_stream_widget = RTSPVideoWriterObject(self.cap,self.update, self.frame, self.flag,path)
+        self.video_stream_widget = RTSPVideoWriterObject(self.cap,self.update, self.frame, self.flag,path,str(datetime.datetime.now()))
     
     def update(self):
         while self.loop:
@@ -84,17 +85,21 @@ class VideoThread(QThread):
 
 # Recording Video
 class RTSPVideoWriterObject(object):
-    def __init__(self, capture, update, frame, flag,path):
+    def __init__(self, capture, update, frame, flag,path, createdTime):
         
         self.frame = frame
         self.flag = flag
         # Default resolutions of the frame are obtained (system dependent)
         self.frame_width = 600 #int(capture.get(3))
         self.frame_height = 480 #int(capture.get(4))
+
+        if os.path.isdir(f'{path}/{self.flag}')==False:
+            print('No Found'+f'{path}/{self.flag}')
+            os.makedirs(f'{path}/{self.flag}')
         
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
-        self.output_video = cv2.VideoWriter(f'{path}/{self.flag}.avi', self.codec, 10, (self.frame_width, self.frame_height))
+        self.output_video = cv2.VideoWriter(f'{path}/{self.flag}/{createdTime}.avi', self.codec, 10, (self.frame_width, self.frame_height))
 
 
     def save_frame(self, frame):
