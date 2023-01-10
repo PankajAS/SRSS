@@ -184,19 +184,19 @@ class MainTab(QWidget):
          data['slot'] = len(self.video_threads)+1
 
 
-         camera = ONVIFCamera(ip, 80, user, password)
+         # camera = ONVIFCamera(ip, 80, user, password)
 
-         media = camera.create_media_service()
+         # media = camera.create_media_service()
 
-         profiles = media.GetProfiles()
-         for profile in profiles:
-            if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
-               sub_stream_profile = profile
-               break
-         stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
-         rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
+         # profiles = media.GetProfiles()
+         # for profile in profiles:
+         #    if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
+         #       sub_stream_profile = profile
+         #       break
+         # stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
+         # rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
 
-         rtsp_uri.Uri = rtsp_uri.Uri[:7] + f'{user}:{password}@' + rtsp_uri.Uri[7:]
+         # rtsp_uri.Uri = rtsp_uri.Uri[:7] + f'{user}:{password}@' + rtsp_uri.Uri[7:]
 
 
          image_label = QLabel("No Camera")
@@ -205,7 +205,7 @@ class MainTab(QWidget):
          # image_label.setScaledContents(True)
          print("datatoAddInitially ",data)
          videoimage = VideoImages(data.get('name'), user, image_label, ip,password,id)
-         newthread = VideoThread(self,rtsp_uri.Uri, flag=data['name'], cam_id=id, videoimage=videoimage)
+         newthread = VideoThread(self,None, flag=data['name'], cam_id=id, videoimage=videoimage,ip=ip,user=user,password=password)
          # newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=id, videoimage=videoimage)
          data['thread'] = newthread
          print("afterThread ",newthread.cam_id)
