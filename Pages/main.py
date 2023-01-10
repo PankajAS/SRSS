@@ -9,6 +9,7 @@ import numpy as np
 from threading import Thread
 from Utils.ANPRDetector import ANPRDetector
 # from wsdiscovery.discovery import ThreadedWSDiscovery as WSDiscovery
+from onvif import ONVIFCamera
 
 
 class MainTab(QWidget):
@@ -181,13 +182,31 @@ class MainTab(QWidget):
          password  = data.get('pass')
          ip  = data.get('ip')
          data['slot'] = len(self.video_threads)+1
+
+
+         camera = ONVIFCamera(ip, 80, user, password)
+
+         media = camera.create_media_service()
+
+         profiles = media.GetProfiles()
+         for profile in profiles:
+            if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
+               sub_stream_profile = profile
+               break
+         stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
+         rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
+
+         rtsp_uri.Uri = rtsp_uri.Uri[:7] + f'{user}:{password}@' + rtsp_uri.Uri[7:]
+
+
          image_label = QLabel("No Camera")
          image_label.setAlignment(Qt.AlignCenter)
          image_label.setStyleSheet("QLabel { background-color : black;color:white; }")
          # image_label.setScaledContents(True)
          print("datatoAddInitially ",data)
          videoimage = VideoImages(data.get('name'), user, image_label, ip,password,id)
-         newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=id, videoimage=videoimage)
+         newthread = VideoThread(self,rtsp_uri.Uri, flag=data['name'], cam_id=id, videoimage=videoimage)
+         # newthread = VideoThread(self,f'rtsp://{user}:{password}@{ip}:554/cam/realmonitor?channel=1&subtype=1', flag=data['name'], cam_id=id, videoimage=videoimage)
          data['thread'] = newthread
          print("afterThread ",newthread.cam_id)
          self.video_threads.append(data)

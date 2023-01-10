@@ -1,7 +1,7 @@
 
 from PyQt5.QtWidgets import * 
 from PyQt5.QtCore import Qt, QRegExp, QThread
-from PyQt5.QtGui import QRegExpValidator
+from PyQt5.QtGui import QRegExpValidator,QColor
 import time
 # from onvif import ONVIFCamera, ONVIFError
 from threading import Thread
@@ -26,7 +26,9 @@ class SettingsTab(QWidget):
 
         self.nameInput = QLineEdit()
         self.ip = QLineEdit()
-        self.ip.setValidator(ipValidator)      
+        self.port = QLineEdit()
+        self.ip.setValidator(ipValidator) 
+        self.port.setValidator(ipValidator)   
         self.username = QLineEdit()
         self.password = QLineEdit()
         self.password.setEchoMode(QLineEdit.Password)
@@ -41,9 +43,12 @@ class SettingsTab(QWidget):
             self.pathLabel.setText(f"Path: {self.path}")
         
         self.saveButton.clicked.connect(self.saveCamera)
+        self.saveButton.setStyleSheet("QPushButton:pressed { background-color: grey;color:black; }" "QPushButton{ border: 2px solid grey;padding:5px;border-radius:5px}")
         self.loading = QLabel("Connecting.....")
         self.error = QLabel("")
         lay = QGridLayout()
+
+       
 
         # lay.addWidget(QtWidgets.QTextEdit(),0,0)
 
@@ -53,7 +58,9 @@ class SettingsTab(QWidget):
 
         lay.addWidget(QTextEdit(), 0,1)
 
-        lay.addLayout(self.createForm(),0,0)
+        form_layout = self.createForm()
+
+        lay.addLayout(form_layout,0,0,Qt.AlignCenter)
         getSettings = self.database.getSettingsRecords()
         for rowPosition, item in enumerate(self.cameraList):
             self.table.insertRow(rowPosition)
@@ -114,6 +121,12 @@ class SettingsTab(QWidget):
 
         lay.addWidget(self.table, 1,0,1,2)
 
+        grid_widget = QWidget()
+        grid_widget.setLayout(lay)
+        grid_palette = grid_widget.palette()
+        grid_palette.setColor(grid_widget.backgroundRole(), QColor(255, 0, 0)) # red background
+        grid_widget.setPalette(grid_palette)
+
         self.setLayout(lay)
 
     def createForm(self):
@@ -121,11 +134,13 @@ class SettingsTab(QWidget):
         layout.setLabelAlignment(Qt.AlignLeft|Qt.AlignVCenter)
 
         pathConfig = QPushButton('Select Location', self)
+        pathConfig.setStyleSheet("QPushButton:pressed { background-color: grey;color:black; }" "QPushButton { border: 2px solid grey;padding:5px;border-radius:5px }")
 
         pathConfig.clicked.connect(partial(self.configVideoLocation))
 
         layout.addRow(QLabel("Camera Name"), self.nameInput)
         layout.addRow(QLabel("Camera Address (IP)"), self.ip)
+        layout.addRow(QLabel("Port"), self.port)
         layout.addRow(QLabel("User Name(ID)"), self.username)
         layout.addRow(QLabel("Password"), self.password)
         layout.addRow(None, self.saveButton)
@@ -213,6 +228,13 @@ class SettingsTab(QWidget):
         self.loading.setHidden(False)
         self.saveButton.hide() 
         try:
+            camera = ONVIFCamera(self.ip.text(), self.port.text(), self.username.text(), self.password.text())
+
+            media = camera.create_media_service()
+
+            media_profile = media.GetProfiles()[0]
+            rtsp_uri = media.GetStreamUri({'ProfileToken': media_profile._token})
+            print(rtsp_uri)
             
             rowPosition = self.table.rowCount()
             id = uuid.uuid4().int & (1<<32)-1

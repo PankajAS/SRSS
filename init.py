@@ -1,12 +1,12 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow,QDesktopWidget, QApplication, QWidget, QTabWidget,QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow,QDesktopWidget, QApplication, QWidget, QTabWidget,QVBoxLayout,QHBoxLayout
 from Pages.main import MainTab
 from Pages.search import SearchTab
 from Pages.settings import SettingsTab
 from Pages.login import LoginForm
 from Config.db import SESDatabase
-
-
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 
 
 class App(QMainWindow):
@@ -30,11 +30,14 @@ class MainTabsLayout(QWidget):
     
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
-        self.layout = QVBoxLayout(self)
+        self.layout = QHBoxLayout(self)
+        
         
         
         # Initialize tab screen
         self.tabs = QTabWidget()
+        self.tabs.setTabPosition(QTabWidget.North)
+        self.layout.setAlignment(Qt.AlignCenter)
         self.tabs.setStyleSheet("""
         QTabBar::tab 
         { 
@@ -45,8 +48,8 @@ class MainTabsLayout(QWidget):
         }
         QTabBar::tab:selected 
         { 
-            background-color : black;
-            color:white;
+            background-color : lightgrey;
+            color:black;
         }
         QTabWidget::pane {
             border: 0 solid white;
@@ -66,22 +69,24 @@ class MainTabsLayout(QWidget):
         self.tabs.resize(400,200)
         
         # Add tabs
-        self.tabs.addTab(self.tab1,"Main")
-        self.tabs.addTab(self.tab2,"Search")
-        self.tabs.addTab(self.tab3,"Settings")
+        self.tabs.addTab(self.tab1,QIcon("./assets/home.svg"),"Main")
+        self.tabs.addTab(self.tab2,QIcon("./assets/search.svg"),"Search")
+        self.tabs.addTab(self.tab3,QIcon("./assets/settings.svg"),"Settings")
         
         
-        # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
+        # # Create first tab
+        # self.tab1.layout = QVBoxLayout(self)
 
         # self.tab1.setLayout(self.grid)
         
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
+        self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setStyleSheet("QWidget { background-color: #171717; }")
     ex = App()
     screenShape = QDesktopWidget().screenGeometry()
     ex.resize(screenShape.width(), screenShape.height())
