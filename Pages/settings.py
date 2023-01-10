@@ -26,9 +26,7 @@ class SettingsTab(QWidget):
 
         self.nameInput = QLineEdit()
         self.ip = QLineEdit()
-        self.port = QLineEdit()
         self.ip.setValidator(ipValidator) 
-        self.port.setValidator(ipValidator)   
         self.username = QLineEdit()
         self.password = QLineEdit()
         self.password.setEchoMode(QLineEdit.Password)
@@ -140,7 +138,6 @@ class SettingsTab(QWidget):
 
         layout.addRow(QLabel("Camera Name"), self.nameInput)
         layout.addRow(QLabel("Camera Address (IP)"), self.ip)
-        layout.addRow(QLabel("Port"), self.port)
         layout.addRow(QLabel("User Name(ID)"), self.username)
         layout.addRow(QLabel("Password"), self.password)
         layout.addRow(None, self.saveButton)
@@ -228,14 +225,6 @@ class SettingsTab(QWidget):
         self.loading.setHidden(False)
         self.saveButton.hide() 
         try:
-            camera = ONVIFCamera(self.ip.text(), self.port.text(), self.username.text(), self.password.text())
-
-            media = camera.create_media_service()
-
-            media_profile = media.GetProfiles()[0]
-            rtsp_uri = media.GetStreamUri({'ProfileToken': media_profile._token})
-            print(rtsp_uri)
-            
             rowPosition = self.table.rowCount()
             id = uuid.uuid4().int & (1<<32)-1
             self.database.addDataToCameraTable(id,self.nameInput.text(),self.ip.text(),self.username.text(),self.password.text())
