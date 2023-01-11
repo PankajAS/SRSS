@@ -3,13 +3,15 @@ import cv2
 import numpy as np
 import easyocr
 from PyQt5.QtCore import pyqtSignal, QThread, Qt
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import pytesseract
 # from matplotlib import pyplot as plt
 # alpr = Alpr('us','C:/openalpr_64/openalpr.conf','C:/openalpr_64/runtime_data')
 class ANPRDetector(QThread):
      number_plate = pyqtSignal(str)
      def __init__(self, parent, img):
         super(QThread, self).__init__(parent)
-        self.faceCascade = cv2.CascadeClassifier('./assets/haarcascade_russian_plate_number.xml')
+        self.faceCascade = cv2.CascadeClassifier('./assets/haarcascade_indian_plate_number.xml')
         self.img = img
 
      def run(self):
@@ -31,10 +33,25 @@ class ANPRDetector(QThread):
             if len(plate)>0:
                 # print("plate", plate)
                 cv2.imwrite("./assets/image.jpg", plate)
-                reader = easyocr.Reader(['en'])
-                result = reader.readtext(plate)
-                print("result", result)
-                if len(result)>0:
-                    print("number=======", result[0][1])
-                    self.number_plate.emit(result[0][1])
+                # reader = easyocr.Reader(['en'], gpu=False, quantize=False)
+                text = pytesseract.image_to_string(plate)
+                print("texttexttext ", text)
+                text = text.strip().replace(" ", "")
+                if text!=None and text!='' and text.isspace()==False:
+                    self.number_plate.emit(text)
+                # result = reader.readtext(plate)
+
+                # with ThreadPoolExecutor() as executor:
+                #     print("ThreadPoolExecutor")
+                #     future = executor.submit(reader.readtext, plate)
+                #     future.add_done_callback(self.handle_done)
+                # print("result=======", result)
+                # if len(result)>0:
+                #     print("number=======", result[0][1])
+                #     self.number_plate.emit(result[0][1])
             # results.append(result)
+     
+     def handle_done(self, future):
+        print("handle_done===", future.result())
+        text = future.result()
+        self.number_plate.emit(text[0][1])
