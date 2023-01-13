@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QListWidget,QBoxLayout,QListWidgetItem, QWidget, QLabel, QGridLayout
+from PyQt5.QtWidgets import QListWidget,QVBoxLayout,QListWidgetItem,QListView, QWidget, QLabel, QGridLayout
 from Config.cv import VideoThread
 from Utils.VideoContainer import VideoImages
 from PyQt5.QtGui import *
@@ -10,6 +10,28 @@ from threading import Thread
 from Utils.ANPRDetector import ANPRDetector
 # from wsdiscovery.discovery import ThreadedWSDiscovery as WSDiscovery
 from onvif import ONVIFCamera
+
+class MyListWidgetItem(QWidget):
+    def __init__(self, image, title, parent=None):
+        super().__init__(parent)
+
+        # Create a label for the thumbnail image
+        self.image_label = QLabel()
+        self.image_label.setPixmap(QtGui.QPixmap.fromImage(image))
+        self.image_label.setAlignment(Qt.AlignHCenter)
+      #   self.image_label.setFixedSize(200,300)
+        self.image_label.setScaledContents(True)
+        # Create a label for the title
+        self.title_label = QLabel(title)
+        self.title_label.setAlignment(Qt.AlignHCenter)
+
+        # Create a layout for the widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_label)
+        layout.addWidget(self.title_label)
+        layout.addStretch()
+        self.setLayout(layout)
+        
 
 
 class MainTab(QWidget):
@@ -32,6 +54,7 @@ class MainTab(QWidget):
         self.cameraGrid = QGridLayout(self)
         self.cameralist = QListWidget(self)
         self.anprView = QListWidget(self)
+        self.anprView.setIconSize(QSize(50, 50))
         self.header = QLabel('Camera List')
         self.header.setStyleSheet("QWidget { padding:5px; background-color : grey; color : white;max-height:20px;min-height:10px }")
         
@@ -144,12 +167,34 @@ class MainTab(QWidget):
          print(image)
          
 
-     @pyqtSlot(str)
-     def add_plats(self,numberplate):
-         listWidgetItem = QListWidgetItem(numberplate)
-         listWidgetItem.setTextAlignment(Qt.AlignHCenter)
+     @pyqtSlot(str,np.ndarray)
+     def add_plats(self,numberplate, img_data):
+         # print("img_data.dtype", img_data.dtype)
+         # listWidgetItem = QListWidgetItem()
+         # listWidgetItem.setTextAlignment(Qt.AlignHCenter)
+         # label = QLabel()
+         # cv2.imwrite("./assets/image2.jpg", img_data)
+         height, width = img_data.shape[:2]
+         bytesPerLine = 1 * width
+         print("img_data.dtype", height, width, bytesPerLine)
+         qimg = QtGui.QImage(img_data.tobytes(), width, height,width, QtGui.QImage.Format_Grayscale8)
+        
+         item_widget = MyListWidgetItem(qimg, numberplate)
+         list_item = QListWidgetItem(self.anprView)
+         list_item.setTextAlignment(Qt.AlignHCenter)
+         list_item.setSizeHint(QSize(60, 200))
+         self.anprView.setItemWidget(list_item, item_widget)
+         # pixmap = QtGui.QPixmap.fromImage(qimg)
+         # scaled_pixmap = pixmap.scaled(QSize(50, 50), Qt.KeepAspectRatio)
+         # listWidgetItem.setIcon(QtGui.QIcon(scaled_pixmap))
+         # listWidgetItem.setSizeHint(QSize(35, 35))
+         # label.setPixmap(pixmap)
+         # listWidgetItem.setText(numberplate)
+         # self.anprView.addItem(listWidgetItem)
+         # self.anprView.setItemWidget(listWidgetItem, label)
       #   self.cameralist.addItem(listWidgetItem)
-         self.anprView.addItem(listWidgetItem)
+         # listWidgetItem.setSizeHint(QSize(50, 50))
+         # self.anprView.addItem(listWidgetItem)
          
 
 

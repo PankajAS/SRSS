@@ -59,11 +59,9 @@ class VideoThread(QThread):
             # print(self.cap)
             self.update()
         except HTTPError as err:
-            self.error_single.emit("Error Camera Connection Failed")
-            self.stop()
+            self.error_single.emit("Error Camera Connection Failed", self.cam_id)
         except ONVIFError as err:
-            self.error_single.emit("Error Camera Connection Failed")
-            self.stop()
+            self.error_single.emit("Error Camera Connection Failed", self.cam_id)
         
 #        self.update()
     def stopThread(self):
