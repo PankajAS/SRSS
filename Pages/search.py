@@ -45,11 +45,20 @@ class SearchTab(QWidget):
         from_date_picker.setCalendarPopup(True) 
 
         to_date_picker = QDateEdit()
-        to_date_picker.setCalendarPopup(True) 
+        to_date_picker.setCalendarPopup(True)
 
-        layout.addRow(QLabel("From Date"), from_date_picker)
-        layout.addRow(QLabel("To Date"), to_date_picker)
-        layout.addRow(QLabel("Vehical Number"), QLineEdit())
+        fd_label = QLabel("From Date")
+        fd_label.setStyleSheet("padding-left: 15px;")
+
+        to_label = QLabel("To Date")
+        to_label.setStyleSheet("padding-left: 15px;")
+
+        vh_label = QLabel("Vehical Number")
+        vh_label.setStyleSheet("padding-left: 15px;")
+
+        layout.addRow(fd_label, from_date_picker)
+        layout.addRow(to_label, to_date_picker)
+        layout.addRow(vh_label, QLineEdit())
         layout.addRow(None, searchButton)
         # layout.addRow(self.pathLabel,pathConfig)
         # layout.addRow(None, self.loading)

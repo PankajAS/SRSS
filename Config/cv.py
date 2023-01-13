@@ -30,7 +30,7 @@ class VideoThread(QThread):
         self.frame = None
         self.video_stream_widget = None
         self.videoimage = videoimage
-        self.isAnpr = True
+        self.isAnpr = False
         self.disply_width = videoimage.width
         self.display_height = videoimage.height
         self.isRecording = False
@@ -38,29 +38,31 @@ class VideoThread(QThread):
 
     def run(self):
         try:
-            # self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
-            # media = self.camera.create_media_service()
+            self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
+            media = self.camera.create_media_service()
 
-            # profiles = media.GetProfiles()
-            # for profile in profiles:
-            #     if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
-            #         sub_stream_profile = profile
-            #         break
-            # stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
-            # rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
-            # self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
+            profiles = media.GetProfiles()
+            for profile in profiles:
+                if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
+                    sub_stream_profile = profile
+                    break
+            stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
+            rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
+            self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
             print("url===>", self.url)
             self.loop = True
-            self.url = "./assets/video.mp4"
+            # self.url = "./assets/video.mp4"
             self.cap = cv2.VideoCapture(self.url)
-            # self.cap.set(cv2.CAP_PROP_FPS, 20)
-            # self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-            # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.cap.set(cv2.CAP_PROP_FPS, 20)
+            self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             # print(self.cap)
             self.update()
         except HTTPError as err:
+            print(err)
             self.error_single.emit("Error Camera Connection Failed", self.cam_id)
         except ONVIFError as err:
+            print(err)
             self.error_single.emit("Error Camera Connection Failed", self.cam_id)
         
 #        self.update()
@@ -118,14 +120,16 @@ class RTSPVideoWriterObject(object):
         if os.path.isdir(f'{path}/{self.flag}')==False:
             print('No Found'+f'{path}/{self.flag}')
             os.makedirs(f'{path}/{self.flag}')
+        open(f'{path}/{self.flag}/{createdTime.replace(" ","_").replace(":","_")}.avi', "w").close()
         
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
-        self.output_video = cv2.VideoWriter(f'{path}/{self.flag}/{createdTime}.avi', self.codec, 10, (self.frame_width, self.frame_height))
-
+        self.output_video = cv2.VideoWriter(f'{path}/{self.flag}/{createdTime.replace(" ","_").replace(":","_")}.avi', self.codec, 10, (self.frame_width, self.frame_height))
+        print("lasterror", f'{path}/{self.flag}/{createdTime.replace(" ","_").replace(":","_")}.avi')
 
     def save_frame(self, frame):
         # Save obtained frame into video output file
+        print("save_frame", frame.shape[:2])
         vidout=cv2.resize(frame,(self.frame_width, self.frame_height))
         self.output_video.write(vidout)
 

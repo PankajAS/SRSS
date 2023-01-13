@@ -136,10 +136,22 @@ class SettingsTab(QWidget):
 
         pathConfig.clicked.connect(partial(self.configVideoLocation))
 
-        layout.addRow(QLabel("Camera Name"), self.nameInput)
-        layout.addRow(QLabel("Camera Address (IP)"), self.ip)
-        layout.addRow(QLabel("User Name(ID)"), self.username)
-        layout.addRow(QLabel("Password"), self.password)
+        n_label = QLabel("Camera Name")
+        n_label.setStyleSheet("padding-left: 15px;")
+
+        ip_label = QLabel("Camera Address (IP)")
+        ip_label.setStyleSheet("padding-left: 15px;")
+
+        id_label = QLabel("User Name(ID)")
+        id_label.setStyleSheet("padding-left: 15px;")
+
+        p_label = QLabel("Password")
+        p_label.setStyleSheet("padding-left: 15px;")
+
+        layout.addRow(n_label, self.nameInput)
+        layout.addRow(ip_label, self.ip)
+        layout.addRow(id_label, self.username)
+        layout.addRow(p_label, self.password)
         layout.addRow(None, self.saveButton)
         layout.addRow(self.pathLabel,pathConfig)
         layout.addRow(None, self.loading)
