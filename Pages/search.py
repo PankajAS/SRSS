@@ -5,9 +5,10 @@ from PyQt5.QtGui import QColor
 from functools import partial
 
 class SearchTab(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, db):
          super(QWidget, self).__init__(parent)
          grid_layout = QGridLayout()
+         self.db = db
 
          form_layout = self.createForm()
          grid_layout.addLayout(form_layout,0,0)
@@ -23,8 +24,8 @@ class SearchTab(QWidget):
 
          grid_layout.addWidget(vbox_widget, 1,0)
 
-         table_layout = self.createTableView()
-         grid_layout.addWidget(table_layout, 2,0)
+         self.table_layout = self.createTableView()
+         grid_layout.addWidget(self.table_layout, 2,0)
 
 
          self.setLayout(grid_layout)
@@ -41,11 +42,11 @@ class SearchTab(QWidget):
         # palette.setColor(QPalette.Button, QColor(255, 0, 0)) # red button color
         # searchButton.setPalette(palette)
         searchButton.clicked.connect(partial(self.searchrecord))
-        from_date_picker = QDateEdit()
-        from_date_picker.setCalendarPopup(True) 
+        self.from_date_picker = QDateEdit()
+        self.from_date_picker.setCalendarPopup(True) 
 
-        to_date_picker = QDateEdit()
-        to_date_picker.setCalendarPopup(True)
+        self.to_date_picker = QDateEdit()
+        self.to_date_picker.setCalendarPopup(True)
 
         fd_label = QLabel("From Date")
         fd_label.setStyleSheet("padding-left: 15px;")
@@ -56,9 +57,12 @@ class SearchTab(QWidget):
         vh_label = QLabel("Vehical Number")
         vh_label.setStyleSheet("padding-left: 15px;")
 
-        layout.addRow(fd_label, from_date_picker)
-        layout.addRow(to_label, to_date_picker)
-        layout.addRow(vh_label, QLineEdit())
+        vhical_editor = QLineEdit()
+        vhical_editor.setReadOnly(True)
+
+        layout.addRow(fd_label, self.from_date_picker)
+        layout.addRow(to_label, self.to_date_picker)
+        layout.addRow(vh_label, vhical_editor)
         layout.addRow(None, searchButton)
         # layout.addRow(self.pathLabel,pathConfig)
         # layout.addRow(None, self.loading)
@@ -70,13 +74,38 @@ class SearchTab(QWidget):
         return layout
 
     def createTableView(self):
-        self.table = QTableWidget(0,4)
-        self.table.setStyleSheet("border-bottom: 2px solid grey;border-left: 2px solid grey;border-right: 2px solid grey;")
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.table.setHorizontalHeaderLabels(["SL NO.","DATE","CAMERA NAME","VEHICALE NUMBER"])
+        table = QTableWidget(0,4)
+        table.setStyleSheet("border-bottom: 2px solid grey;border-left: 2px solid grey;border-right: 2px solid grey;")
+        table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        table.setHorizontalHeaderLabels(["SL NO.","DATE","CAMERA NAME","VEHICALE NUMBER"])
 
-        return self.table
+        return table
 
     def searchrecord(self):
-        print('search')
+        print('search', self.from_date_picker.date().toString("dd-MM-yyyy"))
+        print('search', self.to_date_picker.date().toString("dd-MM-yyyy"))
+        fromd = self.from_date_picker.date().toString("dd-MM-yyyy")
+        fromt = self.to_date_picker.date().toString("dd-MM-yyyy")
+        data = self.db.getVehicalsSearch(fromd,fromt,'')
+        self.table_layout.setRowCount(0)
+        for rowPosition, item in enumerate(data):
+            print(rowPosition)
+            row_c = self.table_layout.rowCount()
+            self.table_layout.insertRow(row_c)
+            sn = QTableWidgetItem(str(rowPosition+1))
+            sn.setTextAlignment(Qt.AlignHCenter)
+
+            date = QTableWidgetItem(item['date'])
+            date.setTextAlignment(Qt.AlignHCenter)
+
+            name = QTableWidgetItem(item['name'])
+            name.setTextAlignment(Qt.AlignHCenter)
+
+            number = QTableWidgetItem(item['number'])
+            number.setTextAlignment(Qt.AlignHCenter)
+
+            self.table_layout.setItem(rowPosition , 0, sn)
+            self.table_layout.setItem(rowPosition , 1, date)
+            self.table_layout.setItem(rowPosition , 2,  name)
+            self.table_layout.setItem(rowPosition , 3,  number)

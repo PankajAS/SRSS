@@ -14,7 +14,7 @@ from requests.exceptions import HTTPError
 # Video capture thread
 class VideoThread(QThread):
     change_pixmap_signal = pyqtSignal(QPixmap, object)
-    detect_pixmap_signal = pyqtSignal(np.ndarray)
+    detect_pixmap_signal = pyqtSignal(np.ndarray,str,str,str)
     error_single = pyqtSignal(str, object)
 
     def __init__(self, parent, url, flag, cam_id, videoimage, ip,user,password):
@@ -38,20 +38,20 @@ class VideoThread(QThread):
 
     def run(self):
         try:
-            self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
-            media = self.camera.create_media_service()
+            # self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
+            # media = self.camera.create_media_service()
 
-            profiles = media.GetProfiles()
-            for profile in profiles:
-                if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
-                    sub_stream_profile = profile
-                    break
-            stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
-            rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
-            self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
+            # profiles = media.GetProfiles()
+            # for profile in profiles:
+            #     if profile.VideoEncoderConfiguration.Resolution.Width <= 640:
+            #         sub_stream_profile = profile
+            #         break
+            # stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
+            # rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
+            # self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
             print("url===>", self.url)
             self.loop = True
-            # self.url = "./assets/video.mp4"
+            self.url = "./assets/video.mp4"
             self.cap = cv2.VideoCapture(self.url)
             self.cap.set(cv2.CAP_PROP_FPS, 20)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
@@ -92,7 +92,7 @@ class VideoThread(QThread):
                 if self.isAnpr==True:
                     self.images.append(cv_img)
                     if len(self.images)==100:
-                        self.detect_pixmap_signal.emit(cv_img)
+                        self.detect_pixmap_signal.emit(cv_img, self.flag,self.ip,self.user)
                         self.images = []
                 if self.isRecording==True and self.video_stream_widget!=None:
                     self.video_stream_widget.save_frame(cv_img)

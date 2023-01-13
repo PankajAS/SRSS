@@ -9,12 +9,15 @@ import re
 # from matplotlib import pyplot as plt
 # alpr = Alpr('us','C:/openalpr_64/openalpr.conf','C:/openalpr_64/runtime_data')
 class ANPRDetector(QThread):
-     number_plate = pyqtSignal(str,np.ndarray)
+     number_plate = pyqtSignal(str,np.ndarray,str,str,str)
      numbers = []
-     def __init__(self, parent, img):
+     def __init__(self, parent, img,name,ip,user):
         super(QThread, self).__init__(parent)
         self.faceCascade = cv2.CascadeClassifier('./assets/haarcascade_indian_plate_number.xml')
         self.img = img
+        self.name = name
+        self.ip = ip
+        self.user = user
 
      def run(self):
             gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
@@ -49,12 +52,12 @@ class ANPRDetector(QThread):
                 print("vehi ===>", vehi.size)
                 cv2.imwrite(f"./assets/image.jpg", vehi)
                 # reader = easyocr.Reader(['en'], gpu=False, quantize=False)
-                pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
+                # pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
                 text = pytesseract.image_to_string(plate)
                 print("texttexttext ", text)
                 text = text.strip().replace(" ", "").replace("  ", "").replace('"', "").replace("*", "")
                 if text!=None and text!='' and text.isspace()==False and text not in self.numbers:
-                    self.number_plate.emit(text,vehi)
+                    self.number_plate.emit(text,vehi, self.name,self.ip,self.user)
                     self.numbers.append(text)
                 # result = reader.readtext(plate)
 

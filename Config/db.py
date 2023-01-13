@@ -1,4 +1,5 @@
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PyQt5.QtCore import QVariant
 import os
 
 class SESDatabase:
@@ -40,6 +41,26 @@ class SESDatabase:
         self.con.commit()
         print(self.con.tables())
     
+    def createVehicaleTable(self):
+        if "vahicales" in self.con.tables() or self.con.isOpen()==False:
+            print("Table Already there")
+            return
+        createTableQuery = QSqlQuery(self.con)
+        createTableQuery.exec(
+            """
+            CREATE TABLE vahicales (
+                id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+                camname VARCHAR(40) NOT NULL,
+                ip VARCHAR(50),
+                number VARCHAR(40) NOT NULL,
+                createdAt DATE
+            )
+            """
+        )
+        
+        self.con.commit()
+        print(self.con.tables())
+    
     def createSettingsTable(self):
         if "settings" in self.con.tables() or self.con.isOpen()==False:
             print("Table Already there")
@@ -68,6 +89,18 @@ class SESDatabase:
         print("inserted-settings: ", query.lastError().text())
         self.con.commit()
         print(self.con.tables())
+    
+    def addDataToVehicaleTable(self, createdAt, id,name,ip,number):
+        if self.con.isOpen()==False:
+            self.con.open()
+        query = QSqlQuery(self.con)
+        
+        result = query.exec(
+         f"""INSERT INTO vahicales (id, camname, ip, number,createdAt)
+         VALUES ('{id}', '{name}', '{ip}', '{number}','{createdAt}')""")
+        print("inserted-settings vahicales: ", query.lastError().text())
+        print(createdAt, id,name,ip,number)
+        self.con.commit()
 
     def deleteSettings(self):
         if self.con.isOpen()==False:
@@ -110,6 +143,26 @@ class SESDatabase:
         while query.next():
             print(query.value(1))
             records.append({"id":query.value(0),"recordingpath":query.value(1)})
+        print(records)
+        return records
+    
+    def getVehicalsSearch(self, fromDate, toDate, vahicleNumber):
+        records = []
+        query = QSqlQuery()
+        query.prepare(f"SELECT * FROM vahicales where createdAt >= ? AND createdAt <= ?")
+        query.addBindValue(QVariant(fromDate))
+        query.addBindValue(QVariant(toDate))
+        query.exec()
+
+        while query.next():
+            id = query.value(0)
+            createdAt = query.value(4)
+            camname = query.value(1)
+            ip = query.value(2)
+            number = query.value(3)
+            # Do something with the values
+            print(id, createdAt, camname, ip, number)
+            records.append({"name":camname,"date":createdAt,"number":number})
         print(records)
         return records
 

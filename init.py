@@ -60,9 +60,10 @@ class MainTabsLayout(QWidget):
         db.createDb()
         db.createCameraTable()
         db.createSettingsTable()
+        db.createVehicaleTable()
 
-        self.tab1 = MainTab(self)
-        self.tab2 = SearchTab(self)
+        self.tab1 = MainTab(self, db)
+        self.tab2 = SearchTab(self, db)
         self.tab3 = SettingsTab(self, self.tab1, db)
         # self.login = LoginForm(self)
         self.tab1.setTab(self.tab3)

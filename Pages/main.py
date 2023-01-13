@@ -4,12 +4,12 @@ from Utils.VideoContainer import VideoImages
 from PyQt5.QtGui import *
 from PyQt5.QtCore import pyqtSlot, Qt, QSize
 from PyQt5 import QtGui
-import cv2
 import numpy as np
 from threading import Thread
 from Utils.ANPRDetector import ANPRDetector
 # from wsdiscovery.discovery import ThreadedWSDiscovery as WSDiscovery
-from onvif import ONVIFCamera
+import uuid
+from datetime import datetime
 
 class MyListWidgetItem(QWidget):
     def __init__(self, image, title, parent=None):
@@ -35,12 +35,13 @@ class MyListWidgetItem(QWidget):
 
 
 class MainTab(QWidget):
-     def __init__(self, parent):
+     def __init__(self, parent, db):
         super(QWidget, self).__init__(parent)
 
         self.cameraInstanceList = []
         self.video_threads = []
         self.tabs = []
+        self.db = db
 
         self.disply_width = 650
         self.display_height = 580
@@ -159,16 +160,16 @@ class MainTab(QWidget):
          return 1
 
 
-     @pyqtSlot(np.ndarray)
-     def detect_plats(self,image):
-         anpr = ANPRDetector(self, image)
+     @pyqtSlot(np.ndarray, str, str,str,)
+     def detect_plats(self,image,name,ip,user):
+         anpr = ANPRDetector(self, image,name,ip,user)
          anpr.number_plate.connect(self.add_plats)
          anpr.start()
          print(image)
          
 
-     @pyqtSlot(str,np.ndarray)
-     def add_plats(self,numberplate, img_data):
+     @pyqtSlot(str,np.ndarray, str,str,str)
+     def add_plats(self,numberplate, img_data,name,ip,user):
          # print("img_data.dtype", img_data.dtype)
          # listWidgetItem = QListWidgetItem()
          # listWidgetItem.setTextAlignment(Qt.AlignHCenter)
@@ -184,6 +185,10 @@ class MainTab(QWidget):
          list_item.setTextAlignment(Qt.AlignHCenter)
          list_item.setSizeHint(QSize(60, 200))
          self.anprView.setItemWidget(list_item, item_widget)
+         id = uuid.uuid4().int & (1<<32)-1
+         timedate = datetime.now().strftime("%d-%m-%Y")
+         # addDataToVehicaleTable(self, createdAt, id,name,ip,number)
+         self.db.addDataToVehicaleTable(timedate, id,name,ip,numberplate)
          # pixmap = QtGui.QPixmap.fromImage(qimg)
          # scaled_pixmap = pixmap.scaled(QSize(50, 50), Qt.KeepAspectRatio)
          # listWidgetItem.setIcon(QtGui.QIcon(scaled_pixmap))
