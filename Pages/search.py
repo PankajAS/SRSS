@@ -57,12 +57,12 @@ class SearchTab(QWidget):
         vh_label = QLabel("Vehical Number")
         vh_label.setStyleSheet("padding-left: 15px;")
 
-        vhical_editor = QLineEdit()
-        vhical_editor.setReadOnly(True)
+        self.vhical_editor = QLineEdit()
+        # self.vhical_editor.setReadOnly(True)
 
         layout.addRow(fd_label, self.from_date_picker)
         layout.addRow(to_label, self.to_date_picker)
-        layout.addRow(vh_label, vhical_editor)
+        layout.addRow(vh_label, self.vhical_editor)
         layout.addRow(None, searchButton)
         # layout.addRow(self.pathLabel,pathConfig)
         # layout.addRow(None, self.loading)
@@ -87,7 +87,7 @@ class SearchTab(QWidget):
         print('search', self.to_date_picker.date().toString("dd-MM-yyyy"))
         fromd = self.from_date_picker.date().toString("dd-MM-yyyy")
         fromt = self.to_date_picker.date().toString("dd-MM-yyyy")
-        data = self.db.getVehicalsSearch(fromd,fromt,'')
+        data = self.db.getVehicalsSearch(fromd,fromt,self.vhical_editor.text())
         self.table_layout.setRowCount(0)
         for rowPosition, item in enumerate(data):
             print(rowPosition)

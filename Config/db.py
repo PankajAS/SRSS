@@ -149,9 +149,15 @@ class SESDatabase:
     def getVehicalsSearch(self, fromDate, toDate, vahicleNumber):
         records = []
         query = QSqlQuery()
-        query.prepare(f"SELECT * FROM vahicales where createdAt >= ? AND createdAt <= ?")
+        query_str = "SELECT * FROM vahicales where createdAt >= ? AND createdAt <= ?"
+        if vahicleNumber!="":
+            query_str += " AND number LIKE ?"
+        print(query_str)
+        query.prepare(query_str)
         query.addBindValue(QVariant(fromDate))
         query.addBindValue(QVariant(toDate))
+        if vahicleNumber!="":
+            query.addBindValue(QVariant(f'%{vahicleNumber}%'))
         query.exec()
 
         while query.next():

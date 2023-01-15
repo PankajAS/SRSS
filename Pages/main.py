@@ -55,6 +55,7 @@ class MainTab(QWidget):
         self.cameraGrid = QGridLayout(self)
         self.cameralist = QListWidget(self)
         self.anprView = QListWidget(self)
+        self.anprView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.anprView.setIconSize(QSize(50, 50))
         self.header = QLabel('Camera List')
         self.header.setStyleSheet("QWidget { padding:5px; background-color : grey; color : white;max-height:20px;min-height:10px }")

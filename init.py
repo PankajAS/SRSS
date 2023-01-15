@@ -13,7 +13,7 @@ class App(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.title = 'SRS - Demo'
+        self.title = 'ELINT'
         self.left = 0
         self.top = 0
         self.width = self.frameGeometry().width()
@@ -87,7 +87,7 @@ class MainTabsLayout(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setStyleSheet("QWidget { background-color: #171717; }")
+    # app.setStyleSheet("QWidget { background-color: #171717; }")
     ex = App()
     screenShape = QDesktopWidget().screenGeometry()
     ex.resize(screenShape.width(), screenShape.height())

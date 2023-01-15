@@ -6,6 +6,12 @@ from PyQt5.QtCore import pyqtSignal, QThread, Qt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pytesseract
 import re
+import string
+import random
+from google.cloud import vision
+from google.oauth2.service_account import Credentials
+
+
 # from matplotlib import pyplot as plt
 # alpr = Alpr('us','C:/openalpr_64/openalpr.conf','C:/openalpr_64/runtime_data')
 class ANPRDetector(QThread):
@@ -18,6 +24,8 @@ class ANPRDetector(QThread):
         self.name = name
         self.ip = ip
         self.user = user
+        self.creds = Credentials.from_service_account_file("./assets/cameraapp-337712-e7d7029c95b5.json")
+        self.client = vision.ImageAnnotatorClient(credentials=self.creds)
 
      def run(self):
             gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
@@ -44,7 +52,9 @@ class ANPRDetector(QThread):
                 vehi = grayvehi[y: y+h, x:x+w]
             # print(len(vehi))
             # cv2.imwrite(f"./assets/vehi.jpg", vehi)    
-            
+            print("SizeVehi ===>", vehi)
+            print("SizePlate ===>", self.random_string_with_prefix("no-number",4))
+            # cv2.imwrite(f"./assets/anpr.jpg", gray)
             # print("faces", faces)
             if len(plate)>0 and vehi.size!=0 and plate.size!=0:
                 # print("plate", plate)
@@ -52,13 +62,31 @@ class ANPRDetector(QThread):
                 print("vehi ===>", vehi.size)
                 cv2.imwrite(f"./assets/image.jpg", vehi)
                 # reader = easyocr.Reader(['en'], gpu=False, quantize=False)
+                
+                # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
                 # pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
-                text = pytesseract.image_to_string(plate)
-                print("texttexttext ", text)
-                text = text.strip().replace(" ", "").replace("  ", "").replace('"', "").replace("*", "")
+                # text = pytesseract.image_to_string(plate)
+                # print("texttexttext ", text)
+
+                im = plate.tobytes()
+                response = self.client.text_detection(image={'content': im})
+                texts = response.text_annotations
+                print("pre", texts)
+                if len(texts)>0:
+                    text = texts[0].description
+                else:
+                    text = None
+
+                # text = text.strip().replace(" ", "").replace("  ", "").replace('"', "").replace("*", "")
                 if text!=None and text!='' and text.isspace()==False and text not in self.numbers:
+                    cv2.imwrite(f"./assets/{text}.jpg", vehi)
                     self.number_plate.emit(text,vehi, self.name,self.ip,self.user)
                     self.numbers.append(text)
+                else:
+                    randomstr = self.random_string_with_prefix("no-number-",4)
+                    cv2.imwrite(f"./assets/{randomstr}.jpg", vehi)
+                    self.number_plate.emit(randomstr,vehi, self.name,self.ip,self.user)
+                    self.numbers.append("----")
                 # result = reader.readtext(plate)
 
                 # with ThreadPoolExecutor() as executor:
@@ -76,26 +104,8 @@ class ANPRDetector(QThread):
         text = future.result()
         self.number_plate.emit(text[0][1])
 
-     def isValidLicenseNo(self,str):
-
-        # Regex to check valid
-        # Indian driving license number
-        regex = ("^(([A-Z]{2}[0-9]{2})" +
-                "( )|([A-Z]{2}-[0-9]" +
-                "{2}))((19|20)[0-9]" +
-                "[0-9])[0-9]{7}$")
-        
-        # Compile the ReGex
-        p = re.compile(regex)
-
-        # If the string is empty
-        # return false
-        if (str == None):
-            return False
-
-        # Return if the string
-        # matched the ReGex
-        if(re.search(p, str)):
-            return True
-        else:
-            return False
+     def random_string_with_prefix(self,prefix:str, length:int):
+        # Random string generator
+        letters = string.ascii_letters
+        result_str = prefix + ''.join(random.choice(letters) for i in range(length))
+        return result_str

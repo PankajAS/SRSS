@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "switchon-337712",
+  "private_key_id": "e7d7029c95b57211783c1abf3999239cfa44739d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC0OckMzINX2aIK\noj7+K7bFu+dmqsaatHMxEA79cwgiaryehNrkdGGgDSZYx3f2BpPEveCOv7fIp1PD\nyCrBs61HlLi65Gv9iYt7ewYP0DESWSuqzoyQSytC1rxuBZg+IkfOWyHFbsBkxwdH\neoRNW4uW7S46CGTmcfIuIJjCc82cdiCHguuugGuJL8eNL1UTw0pdfKU+mYgz/KYp\njjT8XMrhB0D5b3jHogv5nTdn3ZzdEd4MMkREGDoWeHC/A4AMaUbO7NOG6LFlpsJV\nLhnFM5eAiOJBr83h9r/rJPyiavjs6yE7uNnlNBQgP0IWTV0u9cjSBgsJAGULkAby\n1oParrJHAgMBAAECggEABxX2h6BK0bC8JDrjdc7LgtQJHF+T1g/zhMxNf+gpO7aC\nmqDn55oudG0lQtGk2nFrweJ36mTd7u+qkBoAma5cyQxZ2aSSx7HECs4ixjW4mDC/\n/MPeLEDS/0UTZ31PfQc6rNb8aZdvIlyI4WXkab4zAMjBITBPTJgnnhSorOHXWv1h\nCofj1/NYKo8hpjl2vzmRCHE1ncv2xR9uUdmMNp7wBzV1wSO5ig35Ju7PQF4thPJy\nPo1RPqJ84YuEDmZhLVHeyn9eFoA/PZQYiFb2pRxs4ln7AgmkZnES03m29fRS41py\nb8sC4816eqGMmJenW4TvtEz/RX6rzqSUxoahBCNFkQKBgQDmHHbOyB9DziZl6LEQ\n3GA0AkHMqC/m2H3uB8y3IudNfZbPkdgoZrlG6eHEpMdkcpQItPXklD3xawhFzVM9\nei7GG4HzoyoQ/G66m9cSv6y6b84yWcW0RoMjIKRpDsP1ABSbb4ZzOOVpH92g30TH\n7YTAdcJ1kEmlxuz6dyT58ILJYwKBgQDIgIwsz/CtAYPDiUrWZVLEjgIkhp/BLMdv\nWCX26T24p5SDB6rrIGDNDVn/ZTi9gPLir/f5BtitFFDPz/9jH2eZGu1/upRC+Fp2\nKVPy8eGKU4qIB8Z887rBf0VzfEaxB8uuT1ToetvrkfbNcjkjeqPHqG5qGsw15dC+\nJi0t+FE6zQKBgQCwbAZSx2/hBn6+B0cqDCvd9BUKmbAQJs913ZkAl8wKx00G22SE\npS1LxykHIOaWhpokiskzdMyA+XSgP6mgKrsNvC1H5ELuPvuOKskcYMRHNE08oUNI\n0f7cwbwLp/xpLKSf/0Nvt6F7lajQHB2ZwurSu/ZZOESeywMJjKtWzSUYzQKBgQCd\nxyqHiQqn2e1KThuqIwnCys082QOWDBrUr9UQO/LqAFWJ1trVNCF4uuz7YTgJSBPZ\n9wd3279eVAJTxiX+ZpQrk1kZjkVlffIR0evR3i3RoHP/H78+TL3FztVkT4OBg9Tw\nUlVKrIOrGK3SdfQoyzVexFg+/t97+mENgRVEe4fQcQKBgQCyz5NSjFyG3wIG/Pp1\n7DYY+GRy8WpMGY/CjOpkL4r/+Sh7XGDIxa0HrbP2ZH9YvadoIUBkI/uS2ME9W9Uf\n4QAR9jBhw37vkx9Rjn2vIgtQC7HEvXPQ/s4HuB3SngOvLMSILtbUuyYsvwfSuk9N\n1U4E+dkzrFWvChCja2L9+Gq1Cw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "cameraapp@switchon-337712.iam.gserviceaccount.com",
+  "client_id": "112251520501300452050",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cameraapp%40switchon-337712.iam.gserviceaccount.com"
+}
