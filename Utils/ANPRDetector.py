@@ -10,6 +10,7 @@ import string
 import random
 from google.cloud import vision
 from google.oauth2.service_account import Credentials
+from google.api_core.exceptions import InvalidArgument
 
 
 # from matplotlib import pyplot as plt
@@ -67,26 +68,36 @@ class ANPRDetector(QThread):
                 # pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
                 # text = pytesseract.image_to_string(plate)
                 # print("texttexttext ", text)
+                with open("./assets/image.jpg", "rb") as image_file:
+                     content = image_file.read()
 
-                im = plate.tobytes()
-                response = self.client.text_detection(image={'content': im})
-                texts = response.text_annotations
-                print("pre", texts)
-                if len(texts)>0:
-                    text = texts[0].description
-                else:
-                    text = None
+                # im = plate.tobytes()
+                print(content)
+                if content!=None:
+                    try:
+                        response = self.client.text_detection(image={'content': content})
+                        texts = response.text_annotations
+                        print("pre", texts)
+                        if len(texts)>0:
+                            text = texts[0].description
+                        else:
+                            text = None
 
-                # text = text.strip().replace(" ", "").replace("  ", "").replace('"', "").replace("*", "")
-                if text!=None and text!='' and text.isspace()==False and text not in self.numbers:
-                    cv2.imwrite(f"./assets/{text}.jpg", vehi)
-                    self.number_plate.emit(text,vehi, self.name,self.ip,self.user)
-                    self.numbers.append(text)
-                else:
-                    randomstr = self.random_string_with_prefix("no-number-",4)
-                    cv2.imwrite(f"./assets/{randomstr}.jpg", vehi)
-                    self.number_plate.emit(randomstr,vehi, self.name,self.ip,self.user)
-                    self.numbers.append("----")
+                        # text = text.strip().replace(" ", "").replace("  ", "").replace('"', "").replace("*", "")
+                        if text!=None and text!='' and text.isspace()==False and text not in self.numbers:
+                            cv2.imwrite(f"./assets/{text}.jpg", vehi)
+                            self.number_plate.emit(text,vehi, self.name,self.ip,self.user)
+                            self.numbers.append(text)
+                        else:
+                            randomstr = self.random_string_with_prefix("no-number-",4)
+                            cv2.imwrite(f"./assets/{randomstr}.jpg", vehi)
+                            self.number_plate.emit(randomstr,vehi, self.name,self.ip,self.user)
+                            self.numbers.append("----")
+                    except InvalidArgument as e:
+                        if e.code == 400:
+                            print("Error: Missing image or features. Please make sure to pass an image and the correct features to the API.")
+                        else:
+                            print("Error:", e)
                 # result = reader.readtext(plate)
 
                 # with ThreadPoolExecutor() as executor:

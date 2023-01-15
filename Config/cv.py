@@ -38,20 +38,20 @@ class VideoThread(QThread):
 
     def run(self):
         try:
-            self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
-            media = self.camera.create_media_service()
+            # self.camera = ONVIFCamera(self.ip, 80, self.user, self.password)
+            # media = self.camera.create_media_service()
 
-            profiles = media.GetProfiles()
-            for profile in profiles:
-                if profile.VideoEncoderConfiguration.Resolution.Width >= 640:
-                    sub_stream_profile = profile
-                    break
-            stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
-            rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
-            self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
+            # profiles = media.GetProfiles()
+            # for profile in profiles:
+            #     if profile.VideoEncoderConfiguration.Resolution.Width >= 640:
+            #         sub_stream_profile = profile
+            #         break
+            # stream_setup = {'Stream': 'RTP-Unicast', 'Transport': 'RTSP'}
+            # rtsp_uri = media.GetStreamUri({'ProfileToken': sub_stream_profile.token, 'StreamSetup': stream_setup})
+            # self.url = rtsp_uri.Uri[:7] + f'{self.user}:{self.password}@' + rtsp_uri.Uri[7:]
             # print("url===>", self.url)
             self.loop = True
-            # self.url = "./assets/video.mp4"
+            self.url = "./assets/video.mp4"
             self.cap = cv2.VideoCapture(self.url)
             self.cap.set(cv2.CAP_PROP_FPS, 30)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
